@@ -50,7 +50,7 @@ Vectors are columns; $bold(x)=⟨x_1,dots,x_n⟩$ lists components. $A^T$ denote
 
 #sec(1, "Linear systems & elimination")
 $ A bold(x)=bold(b) iff x_1 bold(a)_1+dots+x_n bold(a)_n=bold(b) $
-- Eliminate on $lr([A ∣ bold(b)])$ to REF/RREF; solve pivots bottom-up, leaving non-pivots as parameters. Pivots move right and zero rows go last; in RREF each pivot is $1$ and alone in its column.
+- Solve: row-reduce $lr([A ∣ bold(b)])$ to RREF; check for a row $[0 dots 0 ∣ c]$, $c!=0$. If consistent, choose free variables and solve pivots bottom-up. For $Null(A)$, set each free variable to $1$ in turn (others $0$) and solve the homogeneous system.
 - Allowed: $R_i arrow.l.r R_j$; $R_i arrow.l c R_i$ ($c != 0$); $R_i arrow.l R_i+c R_j$ ($i != j$).
 #table(
   columns: (1fr, 1.45fr),
@@ -63,7 +63,7 @@ $ A bold(x)=bold(b) iff x_1 bold(a)_1+dots+x_n bold(a)_n=bold(b) $
 - Homogeneous $A bold(x)=bold(0)$ is always consistent; a nonzero solution exists iff $r<n$.
 - General solution (if consistent):
   $ bold(x)=bold(x)_p+bold(x)_h, quad bold(x)_h in Null(A) $
-  Set free variables to parameters; their coefficient vectors form a basis for $Null(A)$.
+  Leave free variables as parameters to get $bold(x)_p$; their coefficient vectors give a basis for $Null(A)$.
 - With parameters: choose pivots that stay nonzero; split exceptional values before dividing, inspect residual rows for vanishing/proportionality, then use nullity $n-r$.
 
 #sec(2, "Matrix algebra, inverses & LU")
@@ -74,10 +74,10 @@ $ A bold(x)=bold(b) iff x_1 bold(a)_1+dots+x_n bold(a)_n=bold(b) $
 - $A X=B arrow.r X=A^(-1)B$; $X A=B arrow.r X=B A^(-1)$, when $A$ is invertible. Preserve multiplication order.
 - Elementary $E$: apply one row operation to $I$; left multiplication performs it, $E^(-1)$ reverses it. If $E_k dots E_1 A=R$, then $A=E_1^(-1)dots E_k^(-1)R$. Swap is self-inverse; scaling $c$ reverses by $1/c$; adding $c R_j$ to $R_i$ reverses with $-c R_j$.
 #sub("LU factorisation & solving")
-- Rectangular $A_(m times n)$: $L,P$ are $m times m$, $U$ is $m times n$. Start $U=A$, $L=P=I_m$. Scan columns with pivot row $k$: skip if the remaining column is zero; otherwise swap a nonzero entry into row $k$ (swap rows of $P$ and entries in filled columns of $L$). At pivot column $j$, for each $i>k$ store $ell_(i k)=u_(i j)/u_(k j)$ in $L$, update $U_i arrow.l U_i-ell_(i k)U_k$; advance $k$. Then $P A=L U$.
-- Solve: set $bold(c)=P bold(b)$; forward solve $y_i=c_i-sum_(j<i)ell_(i j)y_j$, then back solve $x_i=(y_i-sum_(j>i)u_(i j)x_j)/u_(i i)$ (square nonsingular case); rectangular: solve $U x=y$ for consistency and free variables.
+- Rectangular $A_(m times n)$: initialize $U=A$, $L=P=I_m$. Scan columns $j$ with pivot row $k$: skip if $U_(k:m,j)=0$; otherwise swap a nonzero entry into row $k$ in $U,P$ and in the already-filled columns of $L$. For each $i>k$, store $ell_(i k)=u_(i j)/u_(k j)$ and update $U_i arrow.l U_i-ell_(i k)U_k$; advance $k$. Then $P A=L U$.
+- Solve: compute $bold(c)=P bold(b)$; forward-solve $y_i=c_i-sum_(j<i)ell_(i j)y_j$, then back-solve $x_i=(y_i-sum_(j>i)u_(i j)x_j)/u_(i i)$. For rectangular $U$, check zero rows for consistency and leave non-pivots free.
 - Since $L$ is invertible, $Null(A)=Null(U)$ and $rank(A)=rank(U)$. Pivot columns of $U$ select a basis from the *original columns of* $A$, not $U$.
-- Reconstruct: write unknown unit lower-triangular $L$; from $A v_j=b_j$, use $L(U v_j)=b_j$ to solve its entries, then $A=L U$.
+- Reconstruct from $A v_j=b_j$: compute $w_j=U v_j$; use $L w_j=b_j$ for each $j$ to solve the subdiagonal entries of unit lower-triangular $L$, then verify $A=L U$.
 
 #sec(3, "Determinants & invertibility")
 For square $A in RR^(n times n)$:
@@ -120,7 +120,7 @@ $ rank(A)+dim Null(A)=n quad ("rank–nullity") $
 - Row operations preserve row space, null space and rank; they generally *change column space*.
 - $bold(b) in Col(A) iff A bold(x)=bold(b)$ is consistent.
 - $dim(U+W)=dim U+dim W-dim(U inter W)$.
-- Intersection: solve $B bold(s)=C bold(t)$ for basis matrices $B,C$; map to $B bold(s)$ and extract independent vectors.
+- Intersection: find a basis of $Null([B -C])$; each null vector stacks $(bold(s),bold(t))$ with $B bold(s)=C bold(t)$. Map each to $B bold(s)$ and discard dependent images; the rest form a basis of $Col(B) inter Col(C)$.
 
 #sec(6, "Coordinates & change of basis")
 Let $B=[bold(b)_1 dots bold(b)_k] in RR^(m times k)$ be a basis matrix for $W subset.eq RR^m$. For $bold(x) in W$, solve $B bold(c)=bold(x)$; the unique solution is $[bold(x)]_cal(B)=bold(c)=(B^T B)^(-1)B^T bold(x)$ (do not invert rectangular $B$).
@@ -168,13 +168,16 @@ Hence $Row(A) inter Null(A)={bold(0)}$ (both lie in $RR^n$).
   $ proj_W bold(b)=Q Q^T bold(b), quad [proj_W bold(b)]_cal(Q)=Q^T bold(b) $
 - For a full-column-rank basis matrix $B$:
   $ P_W=B(B^T B)^(-1)B^T, quad proj_W bold(b)=P_W bold(b) $
-- If the basis columns are not orthonormal, orthonormalise them to form $Q$ first; then project with $Q Q^T bold(b)$.
+- Projection recipe: orthonormalise a basis of $W$ to get $Q$; compute coordinates $bold(c)=Q^T bold(b)$, projection $Q bold(c)$, and residual $bold(b)-Q bold(c)$.
 - Hyperplane $W={bold(x):bold(n)^T bold(x)=0}$: $proj_W bold(x)=bold(x)-bold(n)(bold(n)^T bold(x))/(bold(n)^T bold(n))$, $bold(n)!=bold(0)$.
 - $P_W^2=P_W$, $P_W^T=P_W$; $I-P_W$ projects onto $W^perp$.
   Residual $bold(b)-proj_W bold(b) in W^perp$;
   $"dist"(bold(b),W)=norm(bold(b)-proj_W bold(b))$.
 #sub("Gram–Schmidt & QR")
-For full-column-rank $A=[bold(a)_1 dots bold(a)_k]$, for each $j$: start $bold(w)=bold(a)_j$; for $i<j$, compute $r_(i j)=bold(q)_i^T bold(a)_j$ and update $bold(w) arrow.l bold(w)-r_(i j)bold(q)_i$. Then set $r_(j j)=norm(bold(w))$, $bold(q)_j=bold(w)/r_(j j)$.
+For full-column-rank $A=[bold(a)_1 dots bold(a)_k]$, repeat for $j=1,...,k$:
+1. Start $bold(w)=bold(a)_j$.
+2. For $i=1,...,j-1$, compute $r_(i j)=bold(q)_i^T bold(a)_j$ and update $bold(w) arrow.l bold(w)-r_(i j)bold(q)_i$.
+3. Set $r_(j j)=norm(bold(w))$ and $bold(q)_j=bold(w)/r_(j j)$.
 Assemble $Q=[bold(q)_1 dots bold(q)_k]$ and upper-triangular $R=(r_(i j))$ (zeros below diagonal); then $A=Q R$, $Q^T Q=I_k$. A zero $bold(w)$ flags dependent columns; do not divide by zero.
 - Square orthogonal $Q$: $Q^(-1)=Q^T$, $det Q=plus.minus 1$; preserves lengths and dot products. Rectangular $Q^T Q=I$ does *not* imply $Q Q^T=I$.
 
@@ -184,27 +187,31 @@ $ A^T A hat(bold(x))=A^T bold(b) $
 - Normal equations always consistent; fitted vector $A hat(bold(x))=proj_(Col(A)) bold(b)$ unique. Coefficients need not be unique.
 - If $rank A=n$:
   $ hat(bold(x))=(A^T A)^(-1)A^T bold(b) $
-  Or thin QR $A=Q R$: set $bold(c)=Q^T bold(b)$, back-solve $R hat(bold(x))=bold(c)$; then fitted $=Q bold(c)=Q Q^T bold(b)$ and residual $=bold(b)-Q Q^T bold(b)$. $Q^T bold(b)$ is coordinates, not the fitted vector or coefficients.
-- For any one LS solution $hat(bold(x))_0$, *all* are $hat(bold(x))_0+Null(A)=A^+bold(b)+Null(A)$; they are unique iff $rank A=n$. Also $Null(A^T A)=Null(A)$.
+  Or, using the thin QR $A=Q R$: (1) compute $bold(c)=Q^T bold(b)$; (2) back-solve $R hat(bold(x))=bold(c)$, from $i=n$ down to $1$ using $hat(x)_i=(c_i-sum_(j=i+1)^n r_(i j)hat(x)_j)/r_(i i)$; (3) fitted vector $=Q bold(c)=Q Q^T bold(b)$, residual $=bold(b)-Q bold(c)$, and minimum squared error $=norm(bold(b)-Q bold(c))^2$. $Q^T bold(b)$ is coordinates, not the fitted vector or coefficients.
+- Rank deficient: solve the normal equations for one solution $hat(bold(x))_0$ (set free variables to $0$); add any vector in $Null(A)$ to get all LS solutions. They are unique iff $rank A=n$; $Null(A^T A)=Null(A)$, and $A^+bold(b)$ is the minimum-norm one.
 - Normal-equation residual check: $A^T(bold(b)-A hat(bold(x)))=bold(0)$.
 - Fit $y=beta_0+beta_1 t$: row $i$ of $A$ is $(1,t_i)$, $bold(b)=⟨y_1,dots,y_m⟩$. For a degree-$d$ fit use $(1,t_i,dots,t_i^d)$.
 
 #sec(10, "Eigenvalues & diagonalisation")
 For $A in RR^(n times n)$:
 $ A bold(v)=lambda bold(v), quad bold(v)!=bold(0), quad p_A(lambda)=det(lambda I-A) $
-- *Eigenpairs:* factor $p_A(λ)=det(λ I-A)=0$; for integer coefficients test $±p/q$ ($p$ divides constant, $q$ leading coefficient), then synthetic-divide; use quadratic formula if needed. For each root, solve $(A-λ I)bold(v)=0$ by RREF.
+- *Eigenpairs:* find roots $λ$ of $p_A(λ)=det(λ I-A)$ (for integer coefficients, test $±p/q$, then synthetic-divide; use quadratic formula if needed). For each $λ$, row-reduce $A-λ I$; set free variables to obtain a basis of $E_λ=Null(A-λ I)$.
 - AM = multiplicity as a root; GM $=dim E_λ=n-rank(A-λ I)$; $1<=GM<=AM$. Distinct-eigenvalue eigenvectors are independent; $tr A=sum_i λ_i$, $det A=product_i λ_i$ (with AM).
-- Over $RR$, diagonalizable iff all eigenvalues are real and GM=AM for each; over $CC$, require GM=AM allowing complex eigenvectors (equiv. $n$ independent eigenvectors over the field).
+- *Quick checks over $RR$:* symmetric $A$ is orthogonally diagonalizable; $n$ distinct real eigenvalues guarantee diagonalizability; triangular matrices have their diagonal entries as eigenvalues (repeats still need a GM check). In general, over $RR$ require real eigenvalues and GM=AM for each; over $CC$, require GM=AM allowing complex eigenvectors.
 - Parameters: find eigenvalues/AM; split coincident-root cases and compute GM in each; require sum GM=$n$. Example $mat(r,0,t;0,s,0;0,0,s)$ diagonalizable iff $r!=s$ or $t=0$.
 - Consequences: diagonalizable with sole eigenvalue $λ$ implies $A=λ I$; $A^k=0$ has only eigenvalue $0$ and is diagonalizable iff $A=0$. Nonzero combinations in one eigenspace are eigenvectors; in an eigenbasis $x=sum c_i v_i$, this holds iff nonzero $c_i$ use one eigenvalue. If $A=P H P^(-1)$ and $H w=λ w$, then $P w$ is an eigenvector of $A$.
 - Real $A$ is symmetric iff orthogonally diagonalizable; diagonalizable alone does not imply symmetry.
-- Diagonalise: put $n$ independent eigenvectors in $P$ and matching eigenvalues in $D$; $A=P D P^(-1)$, $A^k=P D^k P^(-1)$; check $A P=P D$. Negative $k$ requires invertible $A$.
+- Diagonalise: choose eigenvectors from the eigenspace bases; if they give $n$ independent vectors, put them in $P$ and their eigenvalues in matching diagonal positions of $D$. Then $A=P D P^(-1)$; verify $A P=P D$. Negative $k$ requires invertible $A$.
 - For diagonalizable $A$, if $x=sum c_i v_i$, then $A^k x=sum c_i λ_i^k v_i$: $|λ_i|<1$ modes vanish, $λ_i=1$ persist, $λ_i=-1$ alternate, and $|λ_i|>1$ requires $c_i=0$ for convergence.
 - If every $λ_i!=1$ has $|λ_i|<1$, then $lim_(k->oo) A^k x=P diag(d_i)P^(-1)x=sum_(λ_i=1)c_i v_i$ ($d_i=1$ for $λ_i=1$, else $0$). This need not be an orthogonal projection; if $dim E_1=1$, limits lie along its eigenvector.
 
 #sec(11, "Singular value decomposition (SVD)")
 Full SVD: $A=U Sigma V^T$, $U in RR^(m times m)$, $Sigma in RR^(m times n)$, $V in RR^(n times n)$; $U^T U=I_m$, $V^T V=I_n$. The diagonal entries are $σ_1>=dots>=σ_r>0$ then $0$; $r=rank A$.
-- Steps: (1) Diagonalise $A^T A$ with an orthonormal eigenbasis $v_i$; orthonormalise within repeated eigenspaces. (2) Sort $λ_i$ decreasing, set $σ_i=sqrt(λ_i)$ ($λ_i>=0$). (3) For $σ_i>0$, set $u_i=A v_i/σ_i$. (4) Complete $U$ by an orthonormal basis of $Null(A^T)$; zero-eigenvalue $v_i$ form a basis of $Null(A)$ and complete $V$. Extra $U$ columns are needed when $m>n$, even at full column rank. (5) Form rectangular $Σ$ with $σ_i$ on its diagonal and zeros elsewhere; check $A=U Σ V^T$, $U^T U=I_m$, $V^T V=I_n$.
+- (1) Form $G=A^T A$ and solve $det(G-λ I)=0$; its $n$ eigenvalues (with multiplicity) are nonnegative. The number of positive eigenvalues is $r=rank(A)$.
+- (2) For each distinct $λ$, row-reduce $G-λ I$ and solve $(G-λ I)v=0$ to get a basis of its eigenspace. Orthonormalise each basis (especially when $λ$ repeats), combine them to get $n$ orthonormal vectors, and sort them by decreasing $λ$; keep each $λ_i$ paired with $v_i$. Set $σ_i=sqrt(λ_i)$.
+- (3) Multiply once: $W=A V=[A v_1 dots A v_n]$. For $i=1,...,r$, divide column $w_i=A v_i$ by its $σ_i$ to get $u_i=w_i/σ_i$ (the first $r$ columns of $U$). Remaining $w_i=0$; never divide by $σ_i=0$. Keep the corresponding $v_i$ to complete $V$.
+- (4) So far $U_r=[u_1 dots u_r]$ has $m$ rows and $r$ columns; full $U$ needs $m$. Find $m-r$ more: row-reduce $A^T$, set free variables to get a basis of $Null(A^T)=Col(A)^perp$, orthonormalise it, and append it: $U=[U_r U_0]$. E.g. $m=3,r=2$: append one unit vector. Reduced SVD stops at $U_r$.
+- (5) Assemble $V=[v_1 dots v_n]$, $U=[u_1 dots u_m]$, and the $m times n$ matrix $Σ$ with $σ_1,...,σ_r$ on its diagonal and zeros elsewhere. Check $A=U Σ V^T$, $U^T U=I_m$, $V^T V=I_n$.
 - $A^T A=V(Σ^T Σ)V^T$, $A A^T=U(Σ Σ^T)U^T$: positive eigenvalues agree ($σ_i^2$); zero counts may differ. Reconstruct $A=sum_(i=1)^r σ_i u_i v_i^T$; zero-singular-value completions do not affect $A$.
 - Projectors: $proj_(Col(A))=U_r U_r^T$, $proj_(Row(A))=V_r V_r^T$. Keep $U,Σ,V$ ordered together; return $V^T$ as the last factor. For $σ_i>0$, sign-flip $u_i,v_i$ together.
 #table(
@@ -223,7 +230,7 @@ Full SVD: $A=U Sigma V^T$, $U in RR^(m times m)$, $Sigma in RR^(m times n)$, $V 
 *Column-stochastic:* $p_(i j)>=0$, $bold(1)^T P=bold(1)^T$; $bold(1)$ is the all-ones vector.
 $ bold(x)_(k+1)=P bold(x)_k, quad bold(x)_k=P^k bold(x)_0 $
 - Probability states have nonnegative entries summing to $1$; $p_(i j)$ is the probability *from $j$ to $i$*.
-- Stationary state: RREF $(P-I)bold(pi)=bold(0)$, then choose a nonnegative null vector and scale it so $bold(1)^T bold(pi)=1$; verify $P bold(pi)=bold(pi)$.
+- Stationary state: find a basis of $Null(P-I)$ by RREF; choose a nonnegative vector $bold(z)$ in that nullspace and set $bold(pi)=bold(z)/(bold(1)^T bold(z))$. Verify $P bold(pi)=bold(pi)$.
 - $1$ is an eigenvalue; all $|lambda|<=1$. Regular (some power strictly positive) $arrow.r$ unique stationary probability state and $P^k bold(x)_0 arrow.r bold(pi)$ for every probability state.
 - *Row-stochastic:* use row states, $bold(x)_(k+1)^T=bold(x)_k^T P$.
 #sub("Geometric transformations")

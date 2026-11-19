@@ -86,7 +86,9 @@ For square $A in RR^(n times n)$:
 - If $det A != 0$, $adj(A)=(C_(i j))^T$ and $A^(-1)=adj(A)/(det A)$.
 - $det(A B)=det A det B$; $det(A^T)=det A$; $det(c A)=c^n det A$; triangular $det A=product_i a_(i i)$. For $P A=L U$, $det A=det P product_i u_(i i)$.
 #sub("Rectangular rank & one-sided inverses")
-$rank(A)<=min(m,n)$; *full rank* means equality. Full column rank $r=n$ ($m>=n$): independent columns, $Null(A)={bold(0)}$, $A^T A$ invertible; left inverse $L A=I_n$, e.g. $L_0=(A^T A)^(-1)A^T$. Full row rank $r=m$ ($n>=m$): $Col(A)=RR^m$, $A x=b$ consistent for every $b$, $A A^T$ invertible; right inverse $A R=I_m$, e.g. $R_0=A^T(A A^T)^(-1)$.
+$rank(A)<=min(m,n)$. For $A in RR^(m times n)$, $A^T A$ is invertible iff $rank(A)=n$ (full column rank): $x^T A^T A x=norm(A x)^2$, so $Null(A^T A)=Null(A)$.
+- *Find a left inverse:* check $rank(A)=n$; compute $G=A^T A$, then $L_0=G^(-1)A^T$. It satisfies $L_0 A=I_n$. This requires independent columns and $m>=n$.
+- *Find a right inverse:* check $rank(A)=m$; compute $H=A A^T$, then $R_0=A^T H^(-1)$. It satisfies $A R_0=I_m$. This requires columns spanning $RR^m$ and $n>=m$.
 - Two-sided inverse requires square full rank; nullity $0$ alone does not make a rectangular matrix invertible. Full-row-rank $A$: solve $A r_j=e_j$ for each column to find a right inverse; all are $R=R_0+N Z$, where columns of $N$ form a basis of $Null(A)$ and $Z in RR^((n-m) times m)$. Full-column-rank $A$: all left inverses are $L=L_0+Z N^T$, where columns of $N$ form a basis of $Null(A^T)$ and $Z in RR^(n times (m-n))$.
 #sub("Invertible matrix theorem — square matrices only")
 $ det A != 0 iff rank(A)=n iff rref(A)=I $
@@ -125,7 +127,7 @@ $ rank(A)+dim Null(A)=n quad ("rank–nullity") $
 #sec(6, "Coordinates & change of basis")
 Let $B=[bold(b)_1 dots bold(b)_k] in RR^(m times k)$ be a basis matrix for $W subset.eq RR^m$. For $bold(x) in W$, solve $B bold(c)=bold(x)$; the unique solution is $[bold(x)]_cal(B)=bold(c)=(B^T B)^(-1)B^T bold(x)$ (do not invert rectangular $B$).
 - If $B$ is orthogonal, $c_i=(bold(b)_i^T bold(x))/(bold(b)_i^T bold(b)_i)$. For $bold(x)=B bold(c), bold(y)=B bold(d)$, $bold(x)^T bold(y)=bold(c)^T(B^T B)bold(d)$. Coordinates preserve addition/scalars; dot products and lengths for all vectors iff the basis is orthonormal.
-- For bases $B,C$ of the *same* $W$, solve $C K=B$ columnwise; then $[bold(x)]_cal(C)=K[bold(x)]_cal(B)$. If $C$ is square, $K=C^(-1)B$; if $C$ has orthonormal columns, $K=C^T B$.
+- *Transition from $B$ to $C$* (same $W$): $K_(C<-B)=lr([[bold(b)_1]_cal(C) quad dots quad [bold(b)_k]_cal(C)])$; its columns are the vectors of basis $B$ written in $C$-coordinates, so $[bold(x)]_cal(C)=K_(C<-B)[bold(x)]_cal(B)$.
 - $B M$ is a basis of $W$ iff $M$ is an invertible $k times k$ matrix. For parameter-dependent candidates, first check membership in $W$, then independence and the required number of vectors.
 
 #sec(7, "Linear transformations")
@@ -206,14 +208,15 @@ $ A bold(v)=lambda bold(v), quad bold(v)!=bold(0), quad p_A(lambda)=det(lambda I
 - If every $λ_i!=1$ has $|λ_i|<1$, then $lim_(k->oo) A^k x=P diag(d_i)P^(-1)x=sum_(λ_i=1)c_i v_i$ ($d_i=1$ for $λ_i=1$, else $0$). This need not be an orthogonal projection; if $dim E_1=1$, limits lie along its eigenvector.
 
 #sec(11, "Singular value decomposition (SVD)")
-Full SVD: $A=U Sigma V^T$, $U in RR^(m times m)$, $Sigma in RR^(m times n)$, $V in RR^(n times n)$; $U^T U=I_m$, $V^T V=I_n$. The diagonal entries are $σ_1>=dots>=σ_r>0$ then $0$; $r=rank A$.
+Every real or complex matrix has an SVD; complex case uses conjugate transpose throughout. Full: $A=U Sigma V^T$, with $U in RR^(m times m)$, $Sigma in RR^(m times n)$, $V in RR^(n times n)$; $U^ast U=I_m$, $V^ast V=I_n$ (over $CC$ for complex $A$). Diagonal: $σ_1>=dots>=σ_r>0$ then $0$; $r=rank A$.
+- Alternative route (replace steps 1–4): diagonalise $A A^T$ to find orthonormal $u_i$ and eigenvalues $λ_i$; set $σ_i=sqrt(λ_i)$. For $σ_i>0$, compute $v_i=A^T u_i/σ_i$. Zero-eigenvalue vectors give $Null(A^T)$ and complete $U$; complete $V$ with an orthonormal basis of $Null(A)$. Then assemble as in step 5. Thus $A^T A$ finds $V$ first, while $A A^T$ finds $U$ first.
 - (1) Form $G=A^T A$ and solve $det(G-λ I)=0$; its $n$ eigenvalues (with multiplicity) are nonnegative. The number of positive eigenvalues is $r=rank(A)$.
-- (2) For each distinct $λ$, row-reduce $G-λ I$ and solve $(G-λ I)v=0$ to get a basis of its eigenspace. Orthonormalise each basis (especially when $λ$ repeats), combine them to get $n$ orthonormal vectors, and sort them by decreasing $λ$; keep each $λ_i$ paired with $v_i$. Set $σ_i=sqrt(λ_i)$.
+- (2) For each distinct $λ$, find a basis of $Null(G-λ I)$ by RREF; orthonormalise each basis, pair its vectors with $λ$, and order by decreasing $λ$. Set $σ_i=sqrt(λ_i)$.
 - (3) Multiply once: $W=A V=[A v_1 dots A v_n]$. For $i=1,...,r$, divide column $w_i=A v_i$ by its $σ_i$ to get $u_i=w_i/σ_i$ (the first $r$ columns of $U$). Remaining $w_i=0$; never divide by $σ_i=0$. Keep the corresponding $v_i$ to complete $V$.
-- (4) So far $U_r=[u_1 dots u_r]$ has $m$ rows and $r$ columns; full $U$ needs $m$. Find $m-r$ more: row-reduce $A^T$, set free variables to get a basis of $Null(A^T)=Col(A)^perp$, orthonormalise it, and append it: $U=[U_r U_0]$. E.g. $m=3,r=2$: append one unit vector. Reduced SVD stops at $U_r$.
+- (4) $U_r=[u_1 dots u_r]$ has $r$ columns; full $U$ needs $m$. Find $m-r$ more by solving $A^T u=0$ (RREF), orthonormalise, and append: $U=[U_r U_0]$. Reduced SVD stops at $U_r$.
 - (5) Assemble $V=[v_1 dots v_n]$, $U=[u_1 dots u_m]$, and the $m times n$ matrix $Σ$ with $σ_1,...,σ_r$ on its diagonal and zeros elsewhere. Check $A=U Σ V^T$, $U^T U=I_m$, $V^T V=I_n$.
-- $A^T A=V(Σ^T Σ)V^T$, $A A^T=U(Σ Σ^T)U^T$: positive eigenvalues agree ($σ_i^2$); zero counts may differ. Reconstruct $A=sum_(i=1)^r σ_i u_i v_i^T$; zero-singular-value completions do not affect $A$.
-- Projectors: $proj_(Col(A))=U_r U_r^T$, $proj_(Row(A))=V_r V_r^T$. Keep $U,Σ,V$ ordered together; return $V^T$ as the last factor. For $σ_i>0$, sign-flip $u_i,v_i$ together.
+- The two Gram matrices have the same positive eigenvalues $σ_i^2$. Reconstruct $A=sum_(i=1)^r σ_i u_i v_i^T$; zero-singular-value completions do not affect $A$.
+- Projectors: $proj_(Col(A))=U_r U_r^T$, $proj_(Row(A))=V_r V_r^T$. Keep $U,Σ,V$ ordered together and return $V^T$ last; sign-flip paired $u_i,v_i$ together.
 #table(
   columns: (1fr, 1fr),
   table.header[*Space*][*SVD basis vectors*],
@@ -224,7 +227,6 @@ Full SVD: $A=U Sigma V^T$, $U in RR^(m times m)$, $Sigma in RR^(m times n)$, $V 
 )
 - Reduced SVD: $A=U_r Sigma_r V_r^T$; keep the $r$ positive singular values and matching columns.
 - Pseudoinverse: $A^+=V_r Sigma_r^(-1)U_r^T$; $A^+ bold(b)$ is the minimum-norm least-squares solution.
-- Rank-one $A=bold(a)bold(b)^T!=0$: $σ_1=norm(bold(a))norm(bold(b))$, $u_1=bold(a)/norm(bold(a))$, $v_1=bold(b)/norm(bold(b))$.
 
 #sec(12, "Stochastic matrices & long-run states")
 *Column-stochastic:* $p_(i j)>=0$, $bold(1)^T P=bold(1)^T$; $bold(1)$ is the all-ones vector.

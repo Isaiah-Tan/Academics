@@ -101,7 +101,7 @@ $ frac(dif, dif x) integral_a^(g(x)) f(t) dif t = f(g(x)) g'(x) $
 for continuous $f$ and differentiable $g$.
 
 - Substitution: $u=g(x)$, $dif u=g'(x) dif x$; change limits for definite integrals.
-- Integration by parts: $integral u dif v = u v - integral v dif u$
+- Integration by parts: $integral u v' dif v = u v - integral u' v dif u$
 - Partial fractions: decompose rational function into simpler terms.
 - Divide first if $deg P >= deg Q$; include all powers of repeated factors and linear numerators for irreducible quadratic factors.
 - Definite integrals give signed area; total area is $integral_a^b |f(x)| dif x$.
@@ -131,13 +131,10 @@ $F(P)=c$, $F in C^1$, $arrow(nabla) F(P) != arrow(0)$.
 - *Normal vector:* $arrow(n)=arrow(nabla) F(P)$,
   $hat(n)=frac(arrow(nabla) F(P), norm(arrow(nabla) F(P)))$.
 - *Tangent vector:* $arrow(nabla) F(P) dot arrow(v)=0$.
-- *Tangent line* to $F(x,y)=c$, $P=(a,b)$:
-  $ F_x(P)(x-a)+F_y(P)(y-b)=0 $
-  $ arrow(v)=⟨-F_y(P),F_x(P)⟩, quad y'=-frac(F_x(P),F_y(P)) quad (F_y(P) != 0) $
-- *Tangent plane* to $F(x,y,z)=c$, $P=(a,b,c_0)$:
-  $ arrow(nabla) F(P) dot (arrow(r)-arrow(p))=0, quad arrow(p)=⟨a,b,c_0⟩ $
-  $ F_x(P)(x-a)+F_y(P)(y-b)+F_z(P)(z-c_0)=0 $
-- *Normal line:* $arrow(r)=arrow(p)+t arrow(nabla) F(P)$.
+- *Tangent plane* to $F(x,y,z)=c$ at point $P=(a_0,b_0,c_0)$:
+  $ arrow(nabla) F(P) dot (⟨x-a_0, y-b_0, z-c_0⟩)=0, quad arrow(p)=⟨a_0,b_0,c_0⟩ $
+  $ F_x(P)(x-a_0)+F_y(P)(y-b_0)+F_z(P)(z-c_0)=0 $
+- *Normal line:* $arrow(r)=P+t arrow(nabla) F(P), t in RR$.
 - *Graph normal* for $z=f(x,y)$:
   $ F(x,y,z)=f(x,y)-z, quad arrow(nabla) F=⟨f_x,f_y,-1⟩ $
 - *Graph tangent plane* at $(a,b,f(a,b))$:
@@ -161,7 +158,10 @@ $ H_f = mat(f_(x x), f_(x y); f_(y x), f_(y y)), quad D=det H_f=f_(x x) f_(y y)-
 In $n$ variables, at a stationary point: $H_f$ positive definite $arrow.r$ strict local min; negative definite $arrow.r$ strict local max; indefinite $arrow.r$ saddle. Semidefinite is inconclusive.
 
 #ssec("Lagrange multipliers")
+let *f* be the function that is to be minimised/maximised, and  *g* be the constraint function.
 $ arrow(nabla) f = lambda arrow(nabla) g, quad g=0 quad (arrow(nabla) g != arrow(0)) $
+Solve simultaneously for $x,y,lambda$ (and $z$ if 3D), using *g* as the last equation.
+
 Check singular constraint points separately; same equations in two or three variables.
 
 #sec("7. Multiple integrals & coordinate transforms")
@@ -169,6 +169,10 @@ Check singular constraint points separately; same equations in two or three vari
 - Double integral: $integral.double_R f(x,y) dif A$ over region $R$
 - Triple integral: $integral.triple_E f(x,y,z) dif V$ over region $E$
 - Reorder integration to match the region; use symmetry when possible.
+- *Mass and moments* (density $rho$): $m=integral.triple_E rho dif V$,
+  $⟨M_(y z),M_(x z),M_(x y)⟩=integral.triple_E ⟨x,y,z⟩ rho dif V$.
+- Centre of mass: $(x, y, z)=⟨M_(y z),M_(x z),M_(x y)⟩/m$.
+  The moments are about planes $y z$, $x z$, $x y$; for uniform density, $rho=1$.
 
 #ssec("Transformations")
 - Polar: $x = r cos theta$, $y = r sin theta$;
@@ -198,8 +202,6 @@ Assume a smooth, one-to-one map with nonzero determinant; evaluate inverse formu
 - Interior: solve $arrow(nabla) f=arrow(0)$; include points where derivatives do not exist.
 - Boundary: restrict $f$ to each edge/curve, or use Lagrange multipliers on regular constraints. Include endpoints, corners and singular constraint points.
 - Compare $f$ at all candidates; smallest/largest values give absolute extrema. For open/unbounded domains, also check limits and whether bounds are attained.
-
-#colbreak()
 
 #sec("Extras: Sequences, series, power series")
 - Sequence $a_n$ converges if $a_n -> L in RR$ as $n -> oo$.

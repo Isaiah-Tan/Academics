@@ -50,16 +50,16 @@ Vectors are columns; $bold(x)=⟨x_1,dots,x_n⟩$ lists components. $A^T$ denote
 
 #sec(1, "Linear systems & elimination")
 $ A bold(x)=bold(b) iff x_1 bold(a)_1+dots+x_n bold(a)_n=bold(b) $
-- Solve: row-reduce $lr([A ∣ bold(b)])$ to RREF; check for a row $[0 dots 0 ∣ c]$, $c!=0$. If consistent, choose free variables and solve pivots bottom-up. For $Null(A)$, set each free variable to $1$ in turn (others $0$) and solve the homogeneous system.
+- Solve: row-reduce $lr([A | bold(b)])$ to RREF; check for a row $[0 dots 0 | c]$, $c!=0$. If consistent, choose free variables and solve pivots bottom-up. For $Null(A)$, set each free variable to $1$ in turn (others $0$) and solve the homogeneous system.
 - Allowed: $R_i arrow.l.r R_j$; $R_i arrow.l c R_i$ ($c != 0$); $R_i arrow.l R_i+c R_j$ ($i != j$).
 #table(
   columns: (1fr, 1.45fr),
   table.header[*Solution type*][*Test for $A bold(x)=bold(b)$*],
-  [No solution], [$rank(lr([A ∣ bold(b)]))>r$],
+  [No solution], [$rank(lr([A | bold(b)]))>r$],
   [Unique solution], [Consistent and $r=n$],
   [Infinitely many], [Consistent and $r<n$; $n-r$ free variables],
 )
-- Consistent iff $rank([A ∣ bold(b)])=r$; every $bold(b)$ is consistent iff $r=m$. Rank $m$ of the augmented matrix alone does *not* guarantee consistency.
+- Consistent iff $rank([A | bold(b)])=r$; every $bold(b)$ is consistent iff $r=m$. Rank $m$ of the augmented matrix alone does *not* guarantee consistency.
 - Homogeneous $A bold(x)=bold(0)$ is always consistent; a nonzero solution exists iff $r<n$.
 - General solution (if consistent):
   $ bold(x)=bold(x)_p+bold(x)_h, quad bold(x)_h in Null(A) $
@@ -70,7 +70,7 @@ $ A bold(x)=bold(b) iff x_1 bold(a)_1+dots+x_n bold(a)_n=bold(b) $
 - $A B$ exists for $A_(m times n),B_(n times p)$; $(A B)_(i j)=sum_(k=1)^n a_(i k)b_(k j)$. Usually $A B != B A$.
 - $(A B)^T=B^T A^T$; $(A+B)^T=A^T+B^T$.
 - For invertible factors: $(A B)^(-1)=B^(-1) A^(-1)$; $(A^T)^(-1)=(A^(-1))^T$.
-- Inverse by elimination: $lr([A ∣ I]) arrow.r lr([I ∣ A^(-1)])$.
+- Find $A^(-1)$ by hand (square $A$): row-reduce $[A ∣ I]$ until the left block is $I$; apply every row operation to both blocks. The right block is $A^(-1)$. If the left block cannot become $I$ (a missing pivot), $A$ has no inverse.
 - $A X=B arrow.r X=A^(-1)B$; $X A=B arrow.r X=B A^(-1)$, when $A$ is invertible. Preserve multiplication order.
 - Elementary $E$: apply one row operation to $I$; left multiplication performs it, $E^(-1)$ reverses it. If $E_k dots E_1 A=R$, then $A=E_1^(-1)dots E_k^(-1)R$. Swap is self-inverse; scaling $c$ reverses by $1/c$; adding $c R_j$ to $R_i$ reverses with $-c R_j$.
 #sub("LU factorisation & solving")
@@ -175,12 +175,13 @@ Hence $Row(A) inter Null(A)={bold(0)}$ (both lie in $RR^n$).
 - $P_W^2=P_W$, $P_W^T=P_W$; $I-P_W$ projects onto $W^perp$.
   Residual $bold(b)-proj_W bold(b) in W^perp$;
   $"dist"(bold(b),W)=norm(bold(b)-proj_W bold(b))$.
-#sub("Gram–Schmidt & QR")
-For full-column-rank $A=[bold(a)_1 dots bold(a)_k]$, repeat for $j=1,...,k$:
-1. Start $bold(w)=bold(a)_j$.
-2. For $i=1,...,j-1$, compute $r_(i j)=bold(q)_i^T bold(a)_j$ and update $bold(w) arrow.l bold(w)-r_(i j)bold(q)_i$.
-3. Set $r_(j j)=norm(bold(w))$ and $bold(q)_j=bold(w)/r_(j j)$.
-Assemble $Q=[bold(q)_1 dots bold(q)_k]$ and upper-triangular $R=(r_(i j))$ (zeros below diagonal); then $A=Q R$, $Q^T Q=I_k$. A zero $bold(w)$ flags dependent columns; do not divide by zero.
+#sub("Gram-Schmidt & QR")
+For full-column-rank $A=[bold(a)_1 dots bold(a)_k]$, process columns left-to-right:
+For each column $bold(a)_j$:
+1. Start with $j=1$.
+2. For each earlier $bold(q)_i$ ($0<i<j$), compute and store $R_(i j)=bold(q)_i dot bold(a)_j$; let $bold(w)_j = bold(a)_j-R_(i j) bold(q)_i$.
+3. Store $R_(j j)=norm(bold(w)_j)$ and normalize: $bold(q)_j=bold(w)_j/norm(bold(w)_j)$.
+The $bold(q)_j$ are columns of $Q$; entries $R_(i j)$ form upper-triangular $R$. Then $A=Q R$, $Q^T Q=I$. If $bold(w)_j=0$, columns are dependent; do not divide by zero.
 - Square orthogonal $Q$: $Q^(-1)=Q^T$, $det Q=plus.minus 1$; preserves lengths and dot products. Rectangular $Q^T Q=I$ does *not* imply $Q Q^T=I$.
 
 #sec(9, "Least squares")
@@ -188,11 +189,9 @@ Minimise $norm(A bold(x)-bold(b))^2$. Normal equations:
 $ A^T A hat(bold(x))=A^T bold(b) $
 - Normal equations always consistent; fitted vector $A hat(bold(x))=proj_(Col(A)) bold(b)$ unique. Coefficients need not be unique.
 - If $rank A=n$:
-  $ hat(bold(x))=(A^T A)^(-1)A^T bold(b) $
-  Or, using the thin QR $A=Q R$: (1) compute $bold(c)=Q^T bold(b)$; (2) back-solve $R hat(bold(x))=bold(c)$, from $i=n$ down to $1$ using $hat(x)_i=(c_i-sum_(j=i+1)^n r_(i j)hat(x)_j)/r_(i i)$; (3) fitted vector $=Q bold(c)=Q Q^T bold(b)$, residual $=bold(b)-Q bold(c)$, and minimum squared error $=norm(bold(b)-Q bold(c))^2$. $Q^T bold(b)$ is coordinates, not the fitted vector or coefficients.
+  #align(center)[$ hat(bold(x))=(A^T A)^(-1)A^T bold(b) = R^(-1)Q^T bold(b)$.]
+- Compute $bold(c)=Q^T bold(b)$, then solve $R hat(bold(x))=bold(c)$ by back-substitution. Fitted vector $=Q bold(c)$; residual $=bold(b)-Q bold(c)$. $Q^T bold(b)$ is not the coefficient vector.
 - Rank deficient: solve the normal equations for one solution $hat(bold(x))_0$ (set free variables to $0$); add any vector in $Null(A)$ to get all LS solutions. They are unique iff $rank A=n$; $Null(A^T A)=Null(A)$, and $A^+bold(b)$ is the minimum-norm one.
-- Normal-equation residual check: $A^T(bold(b)-A hat(bold(x)))=bold(0)$.
-- Fit $y=beta_0+beta_1 t$: row $i$ of $A$ is $(1,t_i)$, $bold(b)=⟨y_1,dots,y_m⟩$. For a degree-$d$ fit use $(1,t_i,dots,t_i^d)$.
 
 #sec(10, "Eigenvalues & diagonalisation")
 For $A in RR^(n times n)$:
@@ -208,14 +207,12 @@ $ A bold(v)=lambda bold(v), quad bold(v)!=bold(0), quad p_A(lambda)=det(lambda I
 - If every $λ_i!=1$ has $|λ_i|<1$, then $lim_(k->oo) A^k x=P diag(d_i)P^(-1)x=sum_(λ_i=1)c_i v_i$ ($d_i=1$ for $λ_i=1$, else $0$). This need not be an orthogonal projection; if $dim E_1=1$, limits lie along its eigenvector.
 
 #sec(11, "Singular value decomposition (SVD)")
-Every real or complex matrix has an SVD; complex case uses conjugate transpose throughout. Full: $A=U Sigma V^T$, with $U in RR^(m times m)$, $Sigma in RR^(m times n)$, $V in RR^(n times n)$; $U^ast U=I_m$, $V^ast V=I_n$ (over $CC$ for complex $A$). Diagonal: $σ_1>=dots>=σ_r>0$ then $0$; $r=rank A$.
-- Alternative route (replace steps 1–4): diagonalise $A A^T$ to find orthonormal $u_i$ and eigenvalues $λ_i$; set $σ_i=sqrt(λ_i)$. For $σ_i>0$, compute $v_i=A^T u_i/σ_i$. Zero-eigenvalue vectors give $Null(A^T)$ and complete $U$; complete $V$ with an orthonormal basis of $Null(A)$. Then assemble as in step 5. Thus $A^T A$ finds $V$ first, while $A A^T$ finds $U$ first.
-- (1) Form $G=A^T A$ and solve $det(G-λ I)=0$; its $n$ eigenvalues (with multiplicity) are nonnegative. The number of positive eigenvalues is $r=rank(A)$.
-- (2) For each distinct $λ$, find a basis of $Null(G-λ I)$ by RREF; orthonormalise each basis, pair its vectors with $λ$, and order by decreasing $λ$. Set $σ_i=sqrt(λ_i)$.
-- (3) Multiply once: $W=A V=[A v_1 dots A v_n]$. For $i=1,...,r$, divide column $w_i=A v_i$ by its $σ_i$ to get $u_i=w_i/σ_i$ (the first $r$ columns of $U$). Remaining $w_i=0$; never divide by $σ_i=0$. Keep the corresponding $v_i$ to complete $V$.
-- (4) $U_r=[u_1 dots u_r]$ has $r$ columns; full $U$ needs $m$. Find $m-r$ more by solving $A^T u=0$ (RREF), orthonormalise, and append: $U=[U_r U_0]$. Reduced SVD stops at $U_r$.
-- (5) Assemble $V=[v_1 dots v_n]$, $U=[u_1 dots u_m]$, and the $m times n$ matrix $Σ$ with $σ_1,...,σ_r$ on its diagonal and zeros elsewhere. Check $A=U Σ V^T$, $U^T U=I_m$, $V^T V=I_n$.
-- The two Gram matrices have the same positive eigenvalues $σ_i^2$. Reconstruct $A=sum_(i=1)^r σ_i u_i v_i^T$; zero-singular-value completions do not affect $A$.
+Every real or complex matrix has an SVD; for complex matrices use conjugate transpose throughout. Full SVD: $A=U Σ V^T$, with $U$ ($m times m$) and $V$ ($n times n$) orthogonal; $Σ$ is $m times n$. Singular values: $σ_1>=dots>=σ_r>0$, then zeros; $r=rank(A)$.
+- To find $V$ first: (1) Form $G=A^T A$. Find eigenvalues $λ_i$ from $det(G-λ I)=0$; for each, find a basis of $Null(G-λ I)$ and orthonormalise it (especially for repeated eigenvalues). Sort largest to smallest. These $v_i$ are columns of $V$; set $sigma_i=sqrt(λ_i)$.
+- (2) Multiply $W=A V$. For each positive $sigma_i$, divide column $w_i$ by $sigma_i$ to get $u_i=w_i/sigma_i$. These are the first $r$ columns of $U$; columns corresponding to $sigma_i=0$ are zero (do not divide).
+- (3) For full $U$, solve $A^T u=0$; orthonormalise the $m-r$ solutions and append them: $U=[u_1 dots u_r u_(r+1) dots u_m]$. For reduced SVD, stop after the first $r$ columns.
+- (4) Put $sigma_i$ on the diagonal of $Σ$ (zeros elsewhere); check $A=U Σ V^T$, $U^T U=I_m$, $V^T V=I_n$. To find $U$ first instead, use $A A^T$; for each positive pair $(λ_i,u_i)$, compute $sigma_i=sqrt(λ_i)$ and $v_i=A^T u_i/sigma_i$, then complete $V$ using $Null(A)$.
+- The two Gram matrices have the same positive eigenvalues $sigma_i^2$. Reconstruct $A=sum_(i=1)^r sigma_i u_i v_i^T$; zero-singular-value completions do not affect $A$.
 - Projectors: $proj_(Col(A))=U_r U_r^T$, $proj_(Row(A))=V_r V_r^T$. Keep $U,Σ,V$ ordered together and return $V^T$ last; sign-flip paired $u_i,v_i$ together.
 #table(
   columns: (1fr, 1fr),

@@ -2,25 +2,30 @@
 #set page(
   paper: "a4",
   margin: (x: 8mm, y: 9mm),
+  footer: context align(center, text(size: 7pt)[MA1521 · #counter(page).display() / 2]),
 )
-#set text(size: 9.2pt)
-#set par(justify: false)
-#show math.equation.where(block: true): set block(above: 0.5em, below: 0.5em)
+#set text(size: 8.5pt, fill: black)
+#set par(justify: false, leading: 0.38em, spacing: 0.35em)
+#set list(spacing: 1.2pt)
+#set enum(spacing: 1.5pt)
+#let mean = math.overline
+#show math.equation.where(block: false): set text(top-edge: "bounds", bottom-edge: "bounds")
+#show math.equation.where(block: true): set block(above: 0.3em, below: 0.3em)
 #let sec(title) = block(
   width: 100%, above: 2mm, below: 1mm, sticky: true,
   inset: (bottom: 0.8mm),
-)[#text(size: 11pt, weight: "bold")[#title]]
+)[#text(size: 10pt, weight: "bold")[#title]]
 #let ssec(title) = block(
   width: 100%, above: 1.5mm, below: 0.7mm, sticky: true,
   inset: (bottom: 0.8mm),
-)[#text(size: 9.2pt, weight: "bold")[#title]]
+)[#text(size: 8.5pt, weight: "bold")[#title]]
 
 #align(center)[
   #text(size: 18pt, weight: "bold")[MA1521]
   #linebreak()
   #text(size: 12pt)[Calculus for Computing]
   #linebreak()
-  #text(size: 8pt, fill: gray)[AY26/27 syllabus · 2-page cheat sheet]
+  #text(size: 8pt)[AY26/27 · 2-page cheat sheet]
 ]
 #v(3mm)
 
@@ -62,7 +67,7 @@ $lim_(x -> a) f(x)=L$ means $f(x)$ is close to $L$ for $x$ near $a$.
 
 - If $f$ is differentiable at $a$, then $f$ is continuous at $a$.
 - L'Hôpital: for $0/0$ or $oo/oo$, $lim frac(f(x), g(x)) = lim frac(f'(x), g'(x))$ if $f,g$ are differentiable nearby, $g' != 0$, and the latter limit exists (possibly infinite).
-- $lim_(x -> 0) (sin x/x)=1$, $lim_(x -> 0) (1+x)^(1/x)=e$
+- $lim_(x -> 0) frac(sin x,x)=1$, $lim_(x -> 0) (1+x)^(1/x)=e$
 - $lim_(x -> oo) (1+1/x)^x = e$
 
 #sec("3. Differentiation")
@@ -89,6 +94,7 @@ For two variables: $L(x,y)=f(a,b)+f_x(a,b)(x-a)+f_y(a,b)(y-b)$.
 - Inflection: $f$ is continuous and concavity changes; candidates have $f''=0$ or $f''$ undefined.
 - Related rates: differentiate w.r.t. time.
 - Tangent line: $y=f(a)+f'(a)(x-a)$
+- Newton iteration: $x_(n+1)=x_n-frac(f(x_n),f'(x_n))$, $f'(x_n)!=0$; convergence depends on the initial guess.
 
 #sec("5. Integration basics")
 #ssec("FTC + techniques")
@@ -101,10 +107,19 @@ $ frac(dif, dif x) integral_a^(g(x)) f(t) dif t = f(g(x)) g'(x) $
 for continuous $f$ and differentiable $g$.
 
 - Substitution: $u=g(x)$, $dif u=g'(x) dif x$; change limits for definite integrals.
-- Integration by parts: $integral u v' dif v = u v - integral u' v dif u$
+- Integration by parts: $integral u v' = u v-integral u' v $.
 - Partial fractions: decompose rational function into simpler terms.
 - Divide first if $deg P >= deg Q$; include all powers of repeated factors and linear numerators for irreducible quadratic factors.
 - Definite integrals give signed area; total area is $integral_a^b |f(x)| dif x$.
+- Variable limits (continuous $f$, differentiable $a,b$):
+  $ frac(dif, dif x) integral_(a(x))^(b(x)) f(t) dif t = f(b(x))b'(x)-f(a(x))a'(x) $
+
+#ssec("Improper integrals")
+$ integral_a^oo f(x) dif x=lim_(b -> oo) integral_a^b f(x) dif x $
+At a singular endpoint, take a one-sided limit. Split at each interior singularity and at a finite point for $(-oo,oo)$; every piece must converge.
+- $integral_1^oo frac(1,x^p) dif x$ converges iff $p>1$.
+- $integral_0^1 frac(1,x^p) dif x$ converges iff $p<1$.
+- For nonnegative functions: compare with a known integral, or use a finite positive limit of their ratio (same convergence).
 
 #ssec("Weierstrass substitution")
 For rational functions of $sin x$ and $cos x$, set $t=tan(x/2)$:
@@ -117,6 +132,8 @@ For $z=f(x,y)$:
 - Partial derivatives: $f_x=frac(partial f, partial x)$, $f_y=frac(partial f, partial y)$
 - Gradient: $arrow(nabla) f = ⟨f_x, f_y⟩$; in 3D, $⟨f_x,f_y,f_z⟩$.
 - Chain rule: $frac(dif z, dif t) = f_x x'(t) + f_y y'(t)$
+- Mixed partials: $f_(x y)=f_(y x)$ if the second partial derivatives are continuous near the point.
+- Multivariable limits: different limits along two paths imply nonexistence; agreeing on a few paths does not prove existence.
 
 #ssec("Directional derivatives")
 $f in C^1$, $arrow(v) != arrow(0)$, $hat(u)=frac(arrow(v),norm(arrow(v)))$.
@@ -134,7 +151,7 @@ $F(P)=c$, $F in C^1$, $arrow(nabla) F(P) != arrow(0)$.
 - *Tangent plane* to $F(x,y,z)=c$ at point $P=(a_0,b_0,c_0)$:
   $ arrow(nabla) F(P) dot (⟨x-a_0, y-b_0, z-c_0⟩)=0, quad arrow(p)=⟨a_0,b_0,c_0⟩ $
   $ F_x(P)(x-a_0)+F_y(P)(y-b_0)+F_z(P)(z-c_0)=0 $
-- *Normal line:* $arrow(r)=P+t arrow(nabla) F(P), t in RR$.
+- *Normal line:* $arrow(r)=arrow(p)+t arrow(nabla) F(P), t in RR$.
 - *Graph normal* for $z=f(x,y)$:
   $ F(x,y,z)=f(x,y)-z, quad arrow(nabla) F=⟨f_x,f_y,-1⟩ $
 - *Graph tangent plane* at $(a,b,f(a,b))$:
@@ -157,6 +174,26 @@ $ H_f = mat(f_(x x), f_(x y); f_(y x), f_(y y)), quad D=det H_f=f_(x x) f_(y y)-
 )
 In $n$ variables, at a stationary point: $H_f$ positive definite $arrow.r$ strict local min; negative definite $arrow.r$ strict local max; indefinite $arrow.r$ saddle. Semidefinite is inconclusive.
 
+#ssec("Second-order approximation")
+For $f in C^2$, $Delta arrow(r)=⟨h,k⟩$, with derivatives at $(a,b)$:
+$ f(a+h,b+k) approx f(a,b)+f_x h+f_y k+frac(1,2)(f_(x x)h^2+2f_(x y)h k+f_(y y)k^2) $
+
+#ssec("Least squares by differentiation")
+For fixed data $(x_i,y_i)$ and a model $y=f(x;a,b,dots)$, minimise the sum of squared differences:
+$ S(a,b,dots)=sum_(i=1)^n [y_i-f(x_i;a,b,dots)]^2 $
+1. Substitute every data point into $[y-f(x)]^2$ and add.
+2. Differentiate $S$ with respect to the *unknown model parameters*; the observed $x_i,y_i$ stay constant.
+3. Solve $S'(a)=0$ for one parameter, or $S_a=S_b=0$ for two. Check $S''>0$ or the Hessian test; compare other candidates and parameter-domain boundaries for a global minimum.
+
+*Chain rule (one parameter):* $r_i=y_i-f(x_i;a)$,
+$ S'(a)=-2sum_i r_i f_a(x_i;a) $
+$ S''(a)=2sum_i ([f_a(x_i;a)]^2-r_i f_(a a)(x_i;a)) $
+
+*Example:* fit $f(x)=a+b x$ to $(0,1),(1,2),(2,2)$:
+$ S(a,b)=(1-a)^2+(2-a-b)^2+(2-a-2b)^2 $
+$ S_a=6a+6b-10=0, quad S_b=6a+10b-12=0 $
+Solving gives $a=7/6$, $b=1/2$. Here $S_(a a)=6>0$ and $det H_S=6(10)-6^2=24>0$ everywhere, so this is the unique global minimum: $y=7/6+x/2$.
+
 #ssec("Lagrange multipliers")
 let *f* be the function that is to be minimised/maximised, and  *g* be the constraint function.
 $ arrow(nabla) f = lambda arrow(nabla) g, quad g=0 quad (arrow(nabla) g != arrow(0)) $
@@ -171,8 +208,8 @@ Check singular constraint points separately; same equations in two or three vari
 - Reorder integration to match the region; use symmetry when possible.
 - *Mass and moments* (density $rho$): $m=integral.triple_E rho dif V$,
   $⟨M_(y z),M_(x z),M_(x y)⟩=integral.triple_E ⟨x,y,z⟩ rho dif V$.
-- Centre of mass: $(x, y, z)=⟨M_(y z),M_(x z),M_(x y)⟩/m$.
-  The moments are about planes $y z$, $x z$, $x y$; for uniform density, $rho=1$.
+- Centre of mass ($m>0$): $⟨mean(x),mean(y),mean(z)⟩=⟨M_(y z),M_(x z),M_(x y)⟩/m$.
+  Moments are about planes $y z$, $x z$, $x y$. Constant density cancels in the centre-of-mass ratios; set $rho=1$ to find the geometric centroid.
 
 #ssec("Transformations")
 - Polar: $x = r cos theta$, $y = r sin theta$;
@@ -184,6 +221,7 @@ Check singular constraint points separately; same equations in two or three vari
   $dif V = rho^2 sin(phi.alt) dif rho dif phi.alt dif theta$.
   Here $rho >= 0$, $0 <= phi.alt <= pi$, $0 <= theta < 2pi$.
 
+#colbreak()
 #ssec("Jacobian: choose the mapping direction")
 For integration in $(u,v)$, starting from $dif A=dif x dif y$:
 - *Given $x=x(u,v)$, $y=y(u,v)$:* use the direct Jacobian.
@@ -209,6 +247,9 @@ Assume a smooth, one-to-one map with nonzero determinant; evaluate inverse formu
 - Ratio test: $L=lim_(n -> oo) |a_(n+1)/a_n|$ (eventually $a_n != 0$).
 - Root test: $L=limsup_(n -> oo) root(n, |a_n|)$.
 - Either test: $L<1$ gives absolute convergence; $L>1$ gives divergence; $L=1$ is inconclusive.
+- Term test: if $a_n$ does not tend to $0$, $sum a_n$ diverges; the converse is false. $sum_(n=1)^oo frac(1,n^p)$ converges iff $p>1$.
+- For $0<=a_n<=b_n$: convergence of $sum b_n$ implies convergence of $sum a_n$; divergence of $sum a_n$ implies divergence of $sum b_n$.
+- Alternating $sum_(n=1)^oo (-1)^(n-1)b_n$: converges if $b_n>=0$ decreases to $0$; truncation error $|R_N|<=b_(N+1)$.
 - Power series: $sum_(n=0)^oo c_n (x-a)^n$
 - Radius $R$ from ratio/root test; check each endpoint separately.
 - Taylor:
@@ -224,4 +265,9 @@ $ cos x = sum_(n=0)^oo frac((-1)^n x^(2n), (2n)!) $
 $ (1+x)^alpha = 1 + alpha x + frac(alpha(alpha-1), 2!) x^2 + dots $
 for $|x|<1$ (all $x$ if $alpha$ is a nonnegative integer).
 The exponential, sine and cosine series converge for all real $x$.
+$ frac(1,1-x)=sum_(n=0)^oo x^n, quad |x|<1 $
+$ ln(1+x)=sum_(n=1)^oo frac((-1)^(n+1)x^n,n), quad -1<x<=1 $
 ]
+
+#context assert(counter(page).final().first() <= 2,
+  message: "MA1521 cheatsheet must fit on at most two A4 pages.")
